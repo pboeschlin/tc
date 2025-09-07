@@ -5,6 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taux de Change</title>
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f7f7f7">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,16 +35,13 @@
     <h1>Taux de Change</h1>
 	
     <label for="montant1">Montant de la devise 1 à convertir:</label>
-	<input type="text" id="amount">
+    <input type="text" id="amount">
+    
     <label for="currency1">Choisir la devise 1:</label>
-    <select id="currency1">
-        <!-- Les options de devise seront ajoutées dynamiquement -->
-    </select>
+    <select id="currency1"></select>
 
     <label for="currency2">Choisir la devise 2:</label>
-    <select id="currency2">
-        <!-- Les options de devise seront ajoutées dynamiquement -->
-    </select>
+    <select id="currency2"></select>
 
     <label for="date">Choisir la date:</label>
     <input type="date" id="date" value="" />
@@ -49,14 +51,14 @@
     <div id="result">
         <p id="rate1" style="font-weight: bold;"></p>
         <p id="rate2" style="font-weight: bold;"></p>
-		<p id="montant" style="font-weight: bold;"></p>
+        <p id="montant" style="font-weight: bold;"></p>
     </div>
 
     <script>
-        const apiKey = '48b327bf8fde30b9ab5a3eb9'; // Remplacez par votre clé d'API
-        const currencies = ["USD", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "FOK", "GBP", "GEL", "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KID", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLE", "SLL", "SOS", "SRD", "SSP", "STN", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TVD", "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XCG", "XDR", "XOF", "XPF", "YER", "ZAR", "ZMW", "ZWL"]; // Liste des devises
+        const apiKey = '48b327bf8fde30b9ab5a3eb9'; // ta clé API
+        const currencies = ["USD","EUR","GBP","JPY","CAD","CHF","AUD","CNY","MAD","INR"]; 
+        // 💡 tu peux remettre ta liste complète ici
 
-        // Remplir les listes déroulantes avec les devises
         const currency1Select = document.getElementById("currency1");
         const currency2Select = document.getElementById("currency2");
 
@@ -72,44 +74,45 @@
             currency2Select.appendChild(option2);
         });
 
-        // Mettre la date par défaut à aujourd'hui
+        // Date par défaut = aujourd’hui
         const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Janvier est 0!
+        const dd = (today.getDate() < 10 ? '0' : '') + today.getDate();
+        const mm = (today.getMonth() + 1 < 10 ? '0' : '') + (today.getMonth() + 1);
         const yyyy = today.getFullYear();
         document.getElementById("date").value = `${yyyy}-${mm}-${dd}`;
 
         async function getExchangeRate() {
             const currency1 = currency1Select.value;
             const currency2 = currency2Select.value;
-            const date = document.getElementById("date").value;
-			const montant1 = document.getElementById("amount").value;
+            const montant1 = document.getElementById("amount").value;
 
-            // URL pour appel API
-            const url1 = `https://v6.exchangerate-api.com/v6/48b327bf8fde30b9ab5a3eb9/latest/${currency1}`;
-            const url2 = `https://v6.exchangerate-api.com/v6/48b327bf8fde30b9ab5a3eb9/latest/${currency2}`;
-			const url3 = `https://v6.exchangerate-api.com/v6/48b327bf8fde30b9ab5a3eb9/pair/${currency1}/${currency2}/${montant1}`;
+            const url = `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${currency1}/${currency2}/${montant1}`;
 
             try {
-                const response1 = await fetch(url1);
-                const data1 = await response1.json();
-                const rate1 = data1.conversion_rates[currency2];
-                document.getElementById("rate1").textContent = `1 ${currency1} = ${rate1} ${currency2}`;
-
-                const response2 = await fetch(url2);
-                const data2 = await response2.json();
-                const rate2 = data2.conversion_rates[currency1];
-                document.getElementById("rate2").textContent = `1 ${currency2} = ${rate2} ${currency1}`;
-				
-				const response3 = await fetch(url3);
-				const data3 = await response3.json();
-				const rate3 = data3.conversion_result;
-				document.getElementById("montant").textContent = `${montant1} ${currency1} = ${rate3} ${currency2}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.result === "success") {
+                    document.getElementById("rate1").textContent = `1 ${currency1} = ${data.conversion_rate} ${currency2}`;
+                    document.getElementById("rate2").textContent = `1 ${currency2} = ${(1/data.conversion_rate).toFixed(4)} ${currency1}`;
+                    document.getElementById("montant").textContent = `${montant1} ${currency1} = ${data.conversion_result} ${currency2}`;
+                } else {
+                    document.getElementById("rate1").textContent = "Erreur API : " + data["error-type"];
+                    document.getElementById("rate2").textContent = "";
+                    document.getElementById("montant").textContent = "";
+                }
             } catch (error) {
-                console.error("Erreur lors de l'obtention des taux de change", error);
-                document.getElementById("rate1").textContent = "Erreur lors de la récupération du taux.";
+                console.error("Erreur API :", error);
+                document.getElementById("rate1").textContent = "Impossible de récupérer le taux.";
                 document.getElementById("rate2").textContent = "";
+                document.getElementById("montant").textContent = "";
             }
+        }
+
+        // Enregistrement du Service Worker pour PWA
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js")
+            .then(() => console.log("Service Worker enregistré"))
+            .catch(err => console.error("Erreur SW:", err));
         }
     </script>
 </body>
